@@ -44,4 +44,6 @@ public class Country {
 		this.countryCapatical = countryCapatical;
 	}
 	
+	public Country() {}
+	
 }
