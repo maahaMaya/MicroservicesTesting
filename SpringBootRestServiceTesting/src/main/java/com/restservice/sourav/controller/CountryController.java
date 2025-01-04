@@ -1,6 +1,7 @@
 package com.restservice.sourav.controller;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,8 +25,13 @@ public class CountryController {
 	CountryService countryService;
 	
 	@GetMapping("/getallcountrie")
-	public List<Country> getCountries(){
-		return countryService.getAllCountries();
+	public ResponseEntity<List<Country>> getCountries(){
+		try {
+			List<Country> countries = countryService.getAllCountries();
+			return new ResponseEntity<List<Country>>(countries, HttpStatus.FOUND);
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
 	}
 	
 	@GetMapping("/getcountry/{id}")
@@ -33,7 +39,7 @@ public class CountryController {
 		try {
 			Country country = countryService.getCountryById(cid);
 			
-			return new ResponseEntity<Country>(country, HttpStatus.OK);
+			return new ResponseEntity<Country>(country, HttpStatus.FOUND);
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
@@ -43,15 +49,21 @@ public class CountryController {
 	public ResponseEntity<Country> getCountryByName(@RequestParam(value = "name") String cname){
 		try {
 			Country country = countryService.getCountryByName(cname);
-			return new ResponseEntity<Country>(country, HttpStatus.OK);
+			return new ResponseEntity<Country>(country, HttpStatus.FOUND);
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 	
 	@PostMapping("/addcountry")
-	public Country addCountry(@RequestBody Country country) {
-		return countryService.addNewCountry(country);
+	public ResponseEntity<Country> addCountry(@RequestBody Country country) {
+		try {
+			country = countryService.addNewCountry(country);
+			return new ResponseEntity<Country>(country, HttpStatus.CREATED);
+			
+		} catch (NoSuchElementException e) {
+			return new ResponseEntity<>(HttpStatus.CONFLICT);
+		}
 	}
 	
 	@PutMapping("/updatecountry/{id}")
@@ -66,17 +78,19 @@ public class CountryController {
 			return new ResponseEntity<Country>(update_country, HttpStatus.OK);
 			
 		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.CONFLICT);
 		}
 	}
 	
-//	@DeleteMapping("/deletecountry/{id}")
-//	public AddResponse deleteCountry(@PathVariable(value = "id") int cid) {
-//		return countryService.deleteCountry(cid);
-//	}
-	
-	@DeleteMapping("/deletecountry")
-	public void deleteCountry(Country  country) {
-		countryService.deleteCountry(country);
+	@DeleteMapping("/deletecountry/{id}")
+	public ResponseEntity<Country> deleteCountry(@PathVariable(value = "id") int cid) {
+		Country country = null; 
+		try {
+			country = countryService.getCountryById(cid);
+			countryService.deleteCountry(country);
+		} catch (NoSuchElementException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND); 
+		}
+		return new ResponseEntity<Country>(country, HttpStatus.OK);
 	}
 }
