@@ -32,6 +32,7 @@ public class CountryController {
 	public ResponseEntity<Country> getCountryById(@PathVariable(value = "id") int cid){
 		try {
 			Country country = countryService.getCountryById(cid);
+			
 			return new ResponseEntity<Country>(country, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -69,8 +70,13 @@ public class CountryController {
 		}
 	}
 	
-	@DeleteMapping("/deletecountry/{id}")
-	public AddResponse deleteCountry(@PathVariable(value = "id") int cid) {
-		return countryService.deleteCountry(cid);
+//	@DeleteMapping("/deletecountry/{id}")
+//	public AddResponse deleteCountry(@PathVariable(value = "id") int cid) {
+//		return countryService.deleteCountry(cid);
+//	}
+	
+	@DeleteMapping("/deletecountry")
+	public void deleteCountry(Country  country) {
+		countryService.deleteCountry(country);
 	}
 }
